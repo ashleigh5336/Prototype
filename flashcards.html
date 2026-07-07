@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyFlow - Flash Cards</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">StudyFlow</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="mindmap.html">Mind Maps</a></li>
+            <li><a href="flashcards.html" class="active">Flash Cards</a></li>
+            <li><a href="notes.html">Study Notes</a></li>
+            <li><a href="about.html">About</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1>Flash Cards</h1>
+            <button class="btn-primary" onclick="createNewDeck()">+ New Deck</button>
+        </div>
+
+        <div class="decks-grid" id="decksGrid">
+        </div>
+
+        <div class="modal" id="studyModal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="studyTitle">Study Deck</h2>
+                    <button class="close-btn" onclick="closeStudy()">&times;</button>
+                </div>
+                <div class="study-area">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="studyProgress"></div>
+                    </div>
+                    <div class="flashcard" id="flashcard" onclick="flipCard()">
+                        <div class="card-front" id="cardFront">Front</div>
+                        <div class="card-back" id="cardBack">Back</div>
+                    </div>
+                    <div class="study-controls">
+                        <button class="btn-secondary" onclick="prevCard()">← Previous</button>
+                        <span id="cardCounter">1 / 5</span>
+                        <button class="btn-secondary" onclick="nextCard()">Next →</button>
+                    </div>
+                    <div class="rating-buttons">
+                        <button class="btn-rating hard" onclick="rateCard('hard')">Hard 😰</button>
+                        <button class="btn-rating medium" onclick="rateCard('medium')">Medium 😐</button>
+                        <button class="btn-rating easy" onclick="rateCard('easy')">Easy 😊</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="deckModal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="deckModalTitle">New Deck</h2>
+                    <button class="close-btn" onclick="closeDeckModal()">&times;</button>
+                </div>
+                <div class="deck-form">
+                    <input type="text" id="deckName" placeholder="Deck Name" class="title-input">
+                    <div class="cards-input" id="cardsInput">
+                        <div class="card-input-pair">
+                            <input type="text" placeholder="Front (Question)" class="card-front-input">
+                            <input type="text" placeholder="Back (Answer)" class="card-back-input">
+                        </div>
+                    </div>
+                    <button class="btn-secondary" onclick="addCardInput()">+ Add Another Card</button>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-primary" onclick="saveDeck()">Save Deck</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentDeck = null;
+        let currentCardIndex = 0;
+        let isFlipped = false;
+
+        function loadDecks() {
+            const decks = JSON.parse(localStorage.getItem('flashcards') || '[]');
+            const grid = document.getElementById('decksGrid');
+            
+            if (decks.length === 0) {
+                grid.innerHTML = '<p class="empty-state">No flashcard decks yet. Create one to start studying!</p>';
+                return;
+            }
+            
+            grid.innerHTML = decks.map((deck, idx) => `
+                <div class="deck-card">
+                    <div class="deck-header">
+                        <h3>${deck.name}</h3>
+                        <span class="deck-count">${deck.cards.length} cards</span>
+                    </div>
+                    <div class="deck-actions">
+                        <button class="btn-primary" onclick="studyDeck(${idx})">Study</button>
+                        <button class="btn-small" onclick="editDeck(${idx})">Edit</button>
+                        <button class="btn-small danger" onclick="deleteDeck(${idx})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function createNewDeck() {
+            document.getElementById('deckModalTitle').textContent = 'New Deck';
+            document.getElementById('deckName').value = '';
+            document.getElementById('cardsInput').innerHTML = `
+                <div class="card-input-pair">
+                    <input type="text" placeholder="Front (Question)" class="card-front-input">
+                    <input type="text" placeholder="Back (Answer)" class="card-back-input">
+                </div>
+            `;
+            document.getElementById('deckModal').style.display = 'flex';
+        }
+
+        function addCardInput() {
+            const div = document.createElement('div');
+            div.className = 'card-input-pair';
+            div.innerHTML = `
+                <input type="text" placeholder="Front (Question)" class="card-front-input">
+                <input type="text" placeholder="Back (Answer)" class="card-back-input">
+            `;
+            document.getElementById('cardsInput').appendChild(div);
+        }
+
+        function saveDeck() {
+            const name = document.getElementById('deckName').value || 'Untitled Deck';
+            const pairs = document.querySelectorAll('.card-input-pair');
+            const cards = [];
+            
+            pairs.forEach(pair => {
+                const front = pair.querySelector('.card-front-input').value;
+                const back = pair.querySelector('.card-back-input').value;
+                if (front && back) {
+                    cards.push({ front, back, rating: 'new' });
+                }
+            });
+            
+            if (cards.length === 0) {
+                alert('Add at least one card with both front and back filled in.');
+                return;
+            }
+            
+            const decks = JSON.parse(localStorage.getItem('flashcards') || '[]');
+            decks.push({
+                id: Date.now(),
+                name: name,
+                date: new Date().toISOString(),
+                type: 'flashcards',
+                cards: cards
+            });
+            
+            localStorage.setItem('flashcards', JSON.stringify(decks));
+            closeDeckModal();
+            loadDecks();
+        }
+
+        function studyDeck(index) {
+            const decks = JSON.parse(localStorage.getItem('flashcards') || '[]');
+            currentDeck = decks[index];
+            currentCardIndex = 0;
+            isFlipped = false;
+            
+            document.getElementById('studyTitle').textContent = 'Study: ' + currentDeck.name;
+            document.getElementById('studyModal').style.display = 'flex';
+            showCard();
+        }
+
+        function showCard() {
+            const card = currentDeck.cards[currentCardIndex];
+            document.getElementById('cardFront').textContent = card.front;
+            document.getElementById('cardBack').textContent = card.back;
+            document.getElementById('cardCounter').textContent = `${currentCardIndex + 1} / ${currentDeck.cards.length}`;
+            document.getElementById('studyProgress').style.width = ((currentCardIndex + 1) / currentDeck.cards.length * 100) + '%';
+            
+            const flashcard = document.getElementById('flashcard');
+            flashcard.classList.remove('flipped');
+            isFlipped = false;
+        }
+
+        function flipCard() {
+            const flashcard = document.getElementById('flashcard');
+            flashcard.classList.toggle('flipped');
+            isFlipped = !isFlipped;
+        }
+
+        function nextCard() {
+            if (currentCardIndex < currentDeck.cards.length - 1) {
+                currentCardIndex++;
+                showCard();
+            }
+        }
+
+        function prevCard() {
+            if (currentCardIndex > 0) {
+                currentCardIndex--;
+                showCard();
+            }
+        }
+
+        function rateCard(rating) {
+            currentDeck.cards[currentCardIndex].rating = rating;
+            
+            const decks = JSON.parse(localStorage.getItem('flashcards') || '[]');
+            const deckIndex = decks.findIndex(d => d.id === currentDeck.id);
+            if (deckIndex !== -1) {
+                decks[deckIndex] = currentDeck;
+                localStorage.setItem('flashcards', JSON.stringify(decks));
+            }
+            
+            if (currentCardIndex < currentDeck.cards.length - 1) {
+                nextCard();
+            } else {
+                alert('Deck complete! Great job studying.');
+                closeStudy();
+            }
+        }
+
+        function editDeck(index) {
+            const decks = JSON.parse(localStorage.getItem('flashcards') || '[]');
+            const deck = decks[index];
+            
+            document.getElementById('deckModalTitle').textContent = 'Edit Deck';
+            document.getElementById('deckName').value = deck.name;
+            
+            let html = '';
+            deck.cards.forEach(card => {
+                html += `
+                    <div class="card-input-pair">
+                        <input type="text" placeholder="Front" class="card-front-input" value="${card.front}">
+                        <input type="text" placeholder="Back" class="card-back-input" value="${card.back}">
+                    </div>
+                `;
+            });
+            document.getElementById('cardsInput').innerHTML = html;
+            document.getElementById('deckModal').style.display = 'flex';
+        }
+
+        function deleteDeck(index) {
+            if (!confirm('Delete this deck?')) return;
+            const decks = JSON.parse(localStorage.getItem('flashcards') || '[]');
+            decks.splice(index, 1);
+            localStorage.setItem('flashcards', JSON.stringify(decks));
+            loadDecks();
+        }
+
+        function closeStudy() {
+            document.getElementById('studyModal').style.display = 'none';
+        }
+
+        function closeDeckModal() {
+            document.getElementById('deckModal').style.display = 'none';
+        }
+
+        if (!localStorage.getItem('quizCompleted')) {
+            window.location.href = 'quiz.html';
+        }
+
+        loadDecks();
+    </script>
+</body>
+</html>

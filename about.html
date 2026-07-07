@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyFlow - About</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">StudyFlow</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="mindmap.html">Mind Maps</a></li>
+            <li><a href="flashcards.html">Flash Cards</a></li>
+            <li><a href="notes.html">Study Notes</a></li>
+            <li><a href="about.html" class="active">About</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content about-page">
+        <div class="about-hero">
+            <div class="logo-large">StudyFlow</div>
+            <h1>Study Smarter, Not Harder</h1>
+            <p>StudyFlow adapts to your unique learning style to help you retain information more effectively.</p>
+        </div>
+
+        <div class="about-sections">
+            <div class="about-card">
+                <div class="about-icon">🎯</div>
+                <h3>Personalized Learning</h3>
+                <p>Our 20-question assessment identifies whether you're a Visual, Auditory, Kinesthetic, or Reading/Writing learner. We then tailor our tools and recommendations to match your style.</p>
+            </div>
+
+            <div class="about-card">
+                <div class="about-icon">🧠</div>
+                <h3>Active Recall</h3>
+                <p>Flashcards with spaced repetition help you practice active recall — the most effective study technique proven by cognitive science.</p>
+            </div>
+
+            <div class="about-card">
+                <div class="about-icon">🕸️</div>
+                <h3>Visual Organization</h3>
+                <p>Mind maps help you see connections between ideas, making complex topics easier to understand and remember.</p>
+            </div>
+
+            <div class="about-card">
+                <div class="about-icon">📝</div>
+                <h3>Smart Notes</h3>
+                <p>Our rich text editor supports formatting, highlighting, and organization — all saved locally in your browser.</p>
+            </div>
+        </div>
+
+        <div class="about-footer">
+            <h3>How It Works</h3>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <p>Take the learning style quiz</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <p>Get personalized recommendations</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <p>Use our tools to study effectively</p>
+                </div>
+            </div>
+            
+            <div class="reset-section">
+                <button class="btn-secondary" onclick="resetProgress()">Reset My Progress</button>
+                <p class="hint">This will clear all your data and require you to retake the quiz.</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function resetProgress() {
+            if (!confirm('Are you sure? This will delete ALL your data including mind maps, flashcards, and notes.')) return;
+            localStorage.clear();
+            window.location.href = 'quiz.html';
+        }
+
+        if (!localStorage.getItem('quizCompleted')) {
+            window.location.href = 'quiz.html';
+        }
+    </script>
+</body>
+</html>

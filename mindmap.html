@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyFlow - Mind Maps</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">StudyFlow</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="mindmap.html" class="active">Mind Maps</a></li>
+            <li><a href="flashcards.html">Flash Cards</a></li>
+            <li><a href="notes.html">Study Notes</a></li>
+            <li><a href="about.html">About</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1>Mind Maps</h1>
+            <button class="btn-primary" onclick="createNewMindMap()">+ New Mind Map</button>
+        </div>
+
+        <div class="templates-section">
+            <h2>Templates</h2>
+            <div class="template-grid">
+                <div class="template-card" onclick="useTemplate('spider')">
+                    <div class="template-preview spider-preview"></div>
+                    <h3>Spider Map</h3>
+                    <p>Central idea with radiating branches</p>
+                </div>
+                <div class="template-card" onclick="useTemplate('hierarchy')">
+                    <div class="template-preview hierarchy-preview"></div>
+                    <h3>Hierarchy</h3>
+                    <p>Top-down tree structure</p>
+                </div>
+                <div class="template-card" onclick="useTemplate('flow')">
+                    <div class="template-preview flow-preview"></div>
+                    <h3>Flow Chart</h3>
+                    <p>Sequential process mapping</p>
+                </div>
+                <div class="template-card" onclick="useTemplate('compare')">
+                    <div class="template-preview compare-preview"></div>
+                    <h3>Compare & Contrast</h3>
+                    <p>Side-by-side comparison</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="my-mindmaps">
+            <h2>My Mind Maps</h2>
+            <div class="items-list" id="mindMapList">
+            </div>
+        </div>
+
+        <div class="modal" id="mindMapModal" style="display: none;">
+            <div class="modal-content large">
+                <div class="modal-header">
+                    <h2 id="modalTitle">New Mind Map</h2>
+                    <button class="close-btn" onclick="closeModal()">&times;</button>
+                </div>
+                <div class="mindmap-editor">
+                    <input type="text" id="mapTitle" placeholder="Mind Map Title" class="title-input">
+                    <div class="canvas-area" id="canvasArea">
+                        <div class="center-node" id="centerNode" contenteditable="true">Main Topic</div>
+                    </div>
+                    <div class="editor-tools">
+                        <button class="btn-secondary" onclick="addBranch()">+ Add Branch</button>
+                        <button class="btn-secondary" onclick="addSubBranch()">+ Add Sub-branch</button>
+                        <button class="btn-secondary" onclick="changeColor()">🎨 Color</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-primary" onclick="saveMindMap()">Save Mind Map</button>
+                    <button class="btn-secondary" onclick="exportMindMap()">Export JSON</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentMapId = null;
+        let branches = [];
+
+        function loadMindMaps() {
+            const maps = JSON.parse(localStorage.getItem('mindMaps') || '[]');
+            const list = document.getElementById('mindMapList');
+            
+            if (maps.length === 0) {
+                list.innerHTML = '<p class="empty-state">No mind maps yet. Create one above!</p>';
+                return;
+            }
+            
+            list.innerHTML = maps.map((map, idx) => `
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>${map.title}</h4>
+                        <span class="item-date">${new Date(map.date).toLocaleDateString()}</span>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn-small" onclick="editMindMap(${idx})">Edit</button>
+                        <button class="btn-small danger" onclick="deleteMindMap(${idx})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function createNewMindMap() {
+            currentMapId = null;
+            branches = [];
+            document.getElementById('modalTitle').textContent = 'New Mind Map';
+            document.getElementById('mapTitle').value = '';
+            document.getElementById('centerNode').textContent = 'Main Topic';
+            document.getElementById('canvasArea').innerHTML = '<div class="center-node" id="centerNode" contenteditable="true">Main Topic</div>';
+            document.getElementById('mindMapModal').style.display = 'flex';
+        }
+
+        function useTemplate(type) {
+            createNewMindMap();
+            const titles = {
+                spider: 'Spider Map',
+                hierarchy: 'Hierarchy Chart',
+                flow: 'Process Flow',
+                compare: 'Comparison Map'
+            };
+            document.getElementById('mapTitle').value = titles[type] || 'New Mind Map';
+            
+            if (type === 'spider') {
+                addBranch('Branch 1');
+                addBranch('Branch 2');
+                addBranch('Branch 3');
+            } else if (type === 'compare') {
+                addBranch('Topic A');
+                addBranch('Topic B');
+            }
+        }
+
+        function addBranch(text = 'New Branch') {
+            const canvas = document.getElementById('canvasArea');
+            const branch = document.createElement('div');
+            branch.className = 'branch-node';
+            branch.contentEditable = true;
+            branch.textContent = text;
+            branch.style.left = (50 + Math.random() * 30 - 15) + '%';
+            branch.style.top = (50 + Math.random() * 30 - 15) + '%';
+            canvas.appendChild(branch);
+        }
+
+        function addSubBranch() {
+            addBranch('Sub-branch');
+        }
+
+        function changeColor() {
+            const colors = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+            const nodes = document.querySelectorAll('.branch-node, .center-node');
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            nodes.forEach(node => node.style.borderColor = randomColor);
+        }
+
+        function saveMindMap() {
+            const title = document.getElementById('mapTitle').value || 'Untitled Mind Map';
+            const maps = JSON.parse(localStorage.getItem('mindMaps') || '[]');
+            
+            const mapData = {
+                id: Date.now(),
+                title: title,
+                date: new Date().toISOString(),
+                type: 'mindmap',
+                centerText: document.getElementById('centerNode').textContent,
+                branches: Array.from(document.querySelectorAll('.branch-node')).map(b => ({
+                    text: b.textContent,
+                    left: b.style.left,
+                    top: b.style.top
+                }))
+            };
+            
+            if (currentMapId !== null) {
+                maps[currentMapId] = mapData;
+            } else {
+                maps.push(mapData);
+            }
+            
+            localStorage.setItem('mindMaps', JSON.stringify(maps));
+            closeModal();
+            loadMindMaps();
+        }
+
+        function editMindMap(index) {
+            const maps = JSON.parse(localStorage.getItem('mindMaps') || '[]');
+            const map = maps[index];
+            currentMapId = index;
+            
+            document.getElementById('modalTitle').textContent = 'Edit Mind Map';
+            document.getElementById('mapTitle').value = map.title;
+            document.getElementById('centerNode').textContent = map.centerText;
+            
+            const canvas = document.getElementById('canvasArea');
+            canvas.innerHTML = '<div class="center-node" id="centerNode" contenteditable="true">' + map.centerText + '</div>';
+            
+            map.branches.forEach(b => {
+                const branch = document.createElement('div');
+                branch.className = 'branch-node';
+                branch.contentEditable = true;
+                branch.textContent = b.text;
+                branch.style.left = b.left;
+                branch.style.top = b.top;
+                canvas.appendChild(branch);
+            });
+            
+            document.getElementById('mindMapModal').style.display = 'flex';
+        }
+
+        function deleteMindMap(index) {
+            if (!confirm('Delete this mind map?')) return;
+            const maps = JSON.parse(localStorage.getItem('mindMaps') || '[]');
+            maps.splice(index, 1);
+            localStorage.setItem('mindMaps', JSON.stringify(maps));
+            loadMindMaps();
+        }
+
+        function exportMindMap() {
+            const maps = JSON.parse(localStorage.getItem('mindMaps') || '[]');
+            const current = maps[currentMapId] || maps[maps.length - 1];
+            if (!current) return;
+            
+            const dataStr = JSON.stringify(current, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${current.title.replace(/\s+/g, '_')}.json`;
+            a.click();
+        }
+
+        function closeModal() {
+            document.getElementById('mindMapModal').style.display = 'none';
+        }
+
+        if (!localStorage.getItem('quizCompleted')) {
+            window.location.href = 'quiz.html';
+        }
+
+        loadMindMaps();
+    </script>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyFlow - Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">StudyFlow</div>
+        <ul class="nav-links">
+            <li><a href="index.html" class="active">Dashboard</a></li>
+            <li><a href="mindmap.html">Mind Maps</a></li>
+            <li><a href="flashcards.html">Flash Cards</a></li>
+            <li><a href="notes.html">Study Notes</a></li>
+            <li><a href="about.html">About</a></li>
+        </ul>
+        <div class="user-info" id="userInfo">
+            <span id="learningStyleBadge">Visual Learner</span>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="welcome-section">
+            <h1>Welcome back, <span id="userName">Student</span></h1>
+            <p class="subtitle">Your personalized learning workspace</p>
+            <div class="learning-style-card" id="styleCard">
+                <h3>Your Learning Style: <span id="styleName">Visual</span></h3>
+                <p id="styleDescription">You learn best through images, diagrams, and spatial understanding.</p>
+                <div class="recommendations" id="recommendations">
+                    <h4>Recommended Techniques:</h4>
+                    <ul id="techList">
+                        <li>Use color-coded notes</li>
+                        <li>Create mind maps for complex topics</li>
+                        <li>Watch video tutorials</li>
+                        <li>Use flashcards with images</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="tools-grid">
+            <a href="mindmap.html" class="tool-card">
+                <div class="tool-icon">🧠</div>
+                <h3>Mind Maps</h3>
+                <p>Visualize connections between ideas</p>
+                <span class="tool-count" id="mindMapCount">0 maps</span>
+            </a>
+
+            <a href="flashcards.html" class="tool-card">
+                <div class="tool-icon">🎴</div>
+                <h3>Flash Cards</h3>
+                <p>Active recall practice</p>
+                <span class="tool-count" id="flashcardCount">0 decks</span>
+            </a>
+
+            <a href="notes.html" class="tool-card">
+                <div class="tool-icon">📝</div>
+                <h3>Study Notes</h3>
+                <p>Organized note-taking</p>
+                <span class="tool-count" id="notesCount">0 notes</span>
+            </a>
+        </div>
+
+        <div class="import-section">
+            <h2>Import Content</h2>
+            <div class="import-box">
+                <input type="file" id="importFile" accept=".json,.txt,.md" hidden>
+                <button class="btn-secondary" onclick="document.getElementById('importFile').click()">
+                    📁 Choose File to Import
+                </button>
+                <p class="import-hint">Supports: JSON, TXT, Markdown</p>
+                <div id="importStatus"></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        if (!localStorage.getItem('quizCompleted')) {
+            window.location.href = 'quiz.html';
+        }
+
+        const userName = localStorage.getItem('userName') || 'Student';
+        const learningStyle = localStorage.getItem('learningStyle') || 'visual';
+        
+        document.getElementById('userName').textContent = userName;
+        document.getElementById('learningStyleBadge').textContent = learningStyle + ' Learner';
+        document.getElementById('styleName').textContent = learningStyle.charAt(0).toUpperCase() + learningStyle.slice(1);
+
+        const descriptions = {
+            visual: 'You learn best through images, diagrams, charts, and spatial understanding.',
+            auditory: 'You retain information through listening, discussions, and verbal explanations.',
+            kinesthetic: 'You learn by doing, moving, and hands-on experimentation.',
+            reading: 'You prefer written words, reading, and taking detailed notes.'
+        };
+
+        const recommendations = {
+            visual: ['Use color-coded notes', 'Create mind maps', 'Watch video tutorials', 'Use diagrams and charts'],
+            auditory: ['Record lectures', 'Study in groups', 'Read aloud', 'Use podcasts'],
+            kinesthetic: ['Take breaks to move', 'Use hands-on activities', 'Role-play concepts', 'Build models'],
+            reading: ['Rewrite notes', 'Use bullet points', 'Read textbooks', 'Write summaries']
+        };
+
+        document.getElementById('styleDescription').textContent = descriptions[learningStyle] || descriptions.visual;
+        
+        const techList = document.getElementById('techList');
+        techList.innerHTML = '';
+        (recommendations[learningStyle] || recommendations.visual).forEach(tech => {
+            const li = document.createElement('li');
+            li.textContent = tech;
+            techList.appendChild(li);
+        });
+
+        function updateCounts() {
+            const mindMaps = JSON.parse(localStorage.getItem('mindMaps') || '[]');
+            const flashcards = JSON.parse(localStorage.getItem('flashcards') || '[]');
+            const notes = JSON.parse(localStorage.getItem('notes') || '[]');
+            
+            document.getElementById('mindMapCount').textContent = mindMaps.length + ' map' + (mindMaps.length !== 1 ? 's' : '');
+            document.getElementById('flashcardCount').textContent = flashcards.length + ' deck' + (flashcards.length !== 1 ? 's' : '');
+            document.getElementById('notesCount').textContent = notes.length + ' note' + (notes.length !== 1 ? 's' : '');
+        }
+        updateCounts();
+
+        document.getElementById('importFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    
+                    if (data.type === 'mindmap') {
+                        const mindMaps = JSON.parse(localStorage.getItem('mindMaps') || '[]');
+                        mindMaps.push(data);
+                        localStorage.setItem('mindMaps', JSON.stringify(mindMaps));
+                    } else if (data.type === 'flashcards') {
+                        const flashcards = JSON.parse(localStorage.getItem('flashcards') || '[]');
+                        flashcards.push(data);
+                        localStorage.setItem('flashcards', JSON.stringify(flashcards));
+                    } else if (data.type === 'notes') {
+                        const notes = JSON.parse(localStorage.getItem('notes') || '[]');
+                        notes.push(data);
+                        localStorage.setItem('notes', JSON.stringify(notes));
+                    }
+                    
+                    document.getElementById('importStatus').innerHTML = '<span class="success">✅ Imported successfully!</span>';
+                    updateCounts();
+                } catch (err) {
+                    document.getElementById('importStatus').innerHTML = '<span class="error">❌ Invalid file format</span>';
+                }
+            };
+            reader.readAsText(file);
+        });
+    </script>
+</body>
+</html>

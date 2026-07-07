@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyFlow - Study Notes</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">StudyFlow</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="mindmap.html">Mind Maps</a></li>
+            <li><a href="flashcards.html">Flash Cards</a></li>
+            <li><a href="notes.html" class="active">Study Notes</a></li>
+            <li><a href="about.html">About</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1>Study Notes</h1>
+            <button class="btn-primary" onclick="createNewNote()">+ New Note</button>
+        </div>
+
+        <div class="notes-layout">
+            <div class="notes-sidebar">
+                <h3>My Notes</h3>
+                <div class="notes-list" id="notesList">
+                </div>
+            </div>
+
+            <div class="notes-editor" id="notesEditor">
+                <div class="editor-toolbar">
+                    <button onclick="formatText('bold')"><b>B</b></button>
+                    <button onclick="formatText('italic')"><i>I</i></button>
+                    <button onclick="formatText('underline')"><u>U</u></button>
+                    <button onclick="insertList()">• List</button>
+                    <button onclick="highlightText()">🖍️ Highlight</button>
+                </div>
+                <input type="text" id="noteTitle" placeholder="Note Title" class="note-title-input">
+                <div class="note-body" id="noteBody" contenteditable="true" placeholder="Start typing your notes here..."></div>
+                <div class="editor-footer">
+                    <span id="wordCount">0 words</span>
+                    <div>
+                        <button class="btn-secondary" onclick="exportNote()">Export</button>
+                        <button class="btn-primary" onclick="saveNote()">Save Note</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentNoteId = null;
+
+        function loadNotesList() {
+            const notes = JSON.parse(localStorage.getItem('notes') || '[]');
+            const list = document.getElementById('notesList');
+            
+            if (notes.length === 0) {
+                list.innerHTML = '<p class="empty-state">No notes yet.</p>';
+                return;
+            }
+            
+            list.innerHTML = notes.map((note, idx) => `
+                <div class="note-item ${currentNoteId === note.id ? 'active' : ''}" onclick="loadNote(${note.id})">
+                    <h4>${note.title || 'Untitled'}</h4>
+                    <span class="note-date">${new Date(note.date).toLocaleDateString()}</span>
+                </div>
+            `).join('');
+        }
+
+        function createNewNote() {
+            currentNoteId = null;
+            document.getElementById('noteTitle').value = '';
+            document.getElementById('noteBody').innerHTML = '';
+            updateWordCount();
+            loadNotesList();
+        }
+
+        function loadNote(id) {
+            const notes = JSON.parse(localStorage.getItem('notes') || '[]');
+            const note = notes.find(n => n.id === id);
+            if (!note) return;
+            
+            currentNoteId = id;
+            document.getElementById('noteTitle').value = note.title || '';
+            document.getElementById('noteBody').innerHTML = note.content || '';
+            updateWordCount();
+            loadNotesList();
+        }
+
+        function saveNote() {
+            const title = document.getElementById('noteTitle').value || 'Untitled Note';
+            const content = document.getElementById('noteBody').innerHTML;
+            const notes = JSON.parse(localStorage.getItem('notes') || '[]');
+            
+            if (currentNoteId) {
+                const index = notes.findIndex(n => n.id === currentNoteId);
+                if (index !== -1) {
+                    notes[index] = { ...notes[index], title, content, date: new Date().toISOString() };
+                }
+            } else {
+                currentNoteId = Date.now();
+                notes.push({
+                    id: currentNoteId,
+                    title: title,
+                    content: content,
+                    date: new Date().toISOString(),
+                    type: 'notes'
+                });
+            }
+            
+            localStorage.setItem('notes', JSON.stringify(notes));
+            loadNotesList();
+            
+            const btn = document.querySelector('.editor-footer .btn-primary');
+            const original = btn.textContent;
+            btn.textContent = 'Saved!';
+            setTimeout(() => btn.textContent = original, 1000);
+        }
+
+        function formatText(command) {
+            document.execCommand(command, false, null);
+            document.getElementById('noteBody').focus();
+        }
+
+        function insertList() {
+            document.execCommand('insertUnorderedList', false, null);
+            document.getElementById('noteBody').focus();
+        }
+
+        function highlightText() {
+            document.execCommand('hiliteColor', false, '#fef3c7');
+            document.getElementById('noteBody').focus();
+        }
+
+        function updateWordCount() {
+            const text = document.getElementById('noteBody').innerText || '';
+            const count = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+            document.getElementById('wordCount').textContent = count + ' words';
+        }
+
+        function exportNote() {
+            const title = document.getElementById('noteTitle').value || 'note';
+            const content = document.getElementById('noteBody').innerHTML;
+            const textContent = document.getElementById('noteBody').innerText;
+            
+            const exportData = {
+                type: 'notes',
+                title: title,
+                content: content,
+                plainText: textContent,
+                date: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${title.replace(/\s+/g, '_')}.json`;
+            a.click();
+        }
+
+        document.getElementById('noteBody').addEventListener('input', updateWordCount);
+
+        if (!localStorage.getItem('quizCompleted')) {
+            window.location.href = 'quiz.html';
+        }
+
+        loadNotesList();
+    </script>
+</body>
+</html>

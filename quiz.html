@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyFlow - Learning Style Quiz</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="quiz-page">
+    <div class="quiz-container">
+        <div class="quiz-header">
+            <div class="logo">StudyFlow</div>
+            <h1>Learning Style Assessment</h1>
+            <p>Complete this 20-question quiz to unlock your personalized study dashboard</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <span class="progress-text" id="progressText">Question 1 of 20</span>
+        </div>
+
+        <div class="quiz-content" id="quizContent">
+        </div>
+
+        <div class="quiz-results" id="quizResults" style="display: none;">
+            <h2>Your Learning Style Results</h2>
+            <div class="result-card" id="resultCard">
+                <div class="result-icon" id="resultIcon">👁️</div>
+                <h3 id="resultTitle">Visual Learner</h3>
+                <p id="resultDesc">You learn best through seeing and observing.</p>
+            </div>
+            
+            <div class="name-input">
+                <label>What should we call you?</label>
+                <input type="text" id="userNameInput" placeholder="Enter your name" maxlength="20">
+            </div>
+            
+            <button class="btn-primary" onclick="finishQuiz()">Enter Dashboard</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                q: "When learning something new, I prefer to:",
+                options: [
+                    { text: "Watch a demonstration or video", type: "visual" },
+                    { text: "Listen to an explanation", type: "auditory" },
+                    { text: "Try it out myself", type: "kinesthetic" },
+                    { text: "Read instructions carefully", type: "reading" }
+                ]
+            },
+            {
+                q: "I remember things best when I:",
+                options: [
+                    { text: "See them written down or drawn", type: "visual" },
+                    { text: "Hear them spoken aloud", type: "auditory" },
+                    { text: "Physically practice them", type: "kinesthetic" },
+                    { text: "Read and rewrite them", type: "reading" }
+                ]
+            },
+            {
+                q: "In a classroom, I prefer to sit:",
+                options: [
+                    { text: "Where I can see the board clearly", type: "visual" },
+                    { text: "Where I can hear the teacher best", type: "auditory" },
+                    { text: "Where I have room to move", type: "kinesthetic" },
+                    { text: "Where I can take notes easily", type: "reading" }
+                ]
+            },
+            {
+                q: "When giving directions, I typically:",
+                options: [
+                    { text: "Draw a map or sketch", type: "visual" },
+                    { text: "Tell them verbally", type: "auditory" },
+                    { text: "Walk them through the route", type: "kinesthetic" },
+                    { text: "Write down step-by-step instructions", type: "reading" }
+                ]
+            },
+            {
+                q: "My study space usually includes:",
+                options: [
+                    { text: "Colorful highlighters and diagrams", type: "visual" },
+                    { text: "A quiet place or music", type: "auditory" },
+                    { text: "Space to pace or fidget", type: "kinesthetic" },
+                    { text: "Lots of books and notebooks", type: "reading" }
+                ]
+            },
+            {
+                q: "When I meet someone new, I remember:",
+                options: [
+                    { text: "Their face and appearance", type: "visual" },
+                    { text: "Their voice and what they said", type: "auditory" },
+                    { text: "How I felt around them", type: "kinesthetic" },
+                    { text: "Their name and details", type: "reading" }
+                ]
+            },
+            {
+                q: "I solve problems by:",
+                options: [
+                    { text: "Visualizing the solution", type: "visual" },
+                    { text: "Talking through the steps", type: "auditory" },
+                    { text: "Trying different approaches", type: "kinesthetic" },
+                    { text: "Writing out the logic", type: "reading" }
+                ]
+            },
+            {
+                q: "I prefer teachers who:",
+                options: [
+                    { text: "Use slides and visuals", type: "visual" },
+                    { text: "Lecture and discuss", type: "auditory" },
+                    { text: "Include hands-on activities", type: "kinesthetic" },
+                    { text: "Provide detailed handouts", type: "reading" }
+                ]
+            },
+            {
+                q: "When reading a story, I imagine:",
+                options: [
+                    { text: "The scenes and characters visually", type: "visual" },
+                    { text: "The dialogue and sounds", type: "auditory" },
+                    { text: "The actions and movements", type: "kinesthetic" },
+                    { text: "The plot and written details", type: "reading" }
+                ]
+            },
+            {
+                q: "I prefer to learn vocabulary by:",
+                options: [
+                    { text: "Seeing the word written", type: "visual" },
+                    { text: "Hearing and repeating it", type: "auditory" },
+                    { text: "Acting out the meaning", type: "kinesthetic" },
+                    { text: "Writing it multiple times", type: "reading" }
+                ]
+            },
+            {
+                q: "When I am bored, I tend to:",
+                options: [
+                    { text: "Doodle or look around", type: "visual" },
+                    { text: "Hum or talk to myself", type: "auditory" },
+                    { text: "Fidget or move around", type: "kinesthetic" },
+                    { text: "Read or write something", type: "reading" }
+                ]
+            },
+            {
+                q: "I organize my notes by:",
+                options: [
+                    { text: "Using colors and mind maps", type: "visual" },
+                    { text: "Recording audio notes", type: "auditory" },
+                    { text: "Keeping them minimal and active", type: "kinesthetic" },
+                    { text: "Writing detailed outlines", type: "reading" }
+                ]
+            },
+            {
+                q: "I prefer to study:",
+                options: [
+                    { text: "With flashcards and charts", type: "visual" },
+                    { text: "By discussing with others", type: "auditory" },
+                    { text: "Through practice problems", type: "kinesthetic" },
+                    { text: "By reading the textbook", type: "reading" }
+                ]
+            },
+            {
+                q: "When I spell a word, I:",
+                options: [
+                    { text: "Visualize the letters", type: "visual" },
+                    { text: "Sound it out loud", type: "auditory" },
+                    { text: "Write it to feel the shape", type: "kinesthetic" },
+                    { text: "Write it down to check", type: "reading" }
+                ]
+            },
+            {
+                q: "I am most distracted by:",
+                options: [
+                    { text: "Visual clutter or movement", type: "visual" },
+                    { text: "Loud noises or conversations", type: "auditory" },
+                    { text: "Sitting still for too long", type: "kinesthetic" },
+                    { text: "Disorganized text or typos", type: "reading" }
+                ]
+            },
+            {
+                q: "I prefer to receive feedback:",
+                options: [
+                    { text: "With visual examples", type: "visual" },
+                    { text: "Through verbal discussion", type: "auditory" },
+                    { text: "By trying and adjusting", type: "kinesthetic" },
+                    { text: "In written comments", type: "reading" }
+                ]
+            },
+            {
+                q: "When learning a new skill, I first want to:",
+                options: [
+                    { text: "See how it's done", type: "visual" },
+                    { text: "Hear an explanation", type: "auditory" },
+                    { text: "Start doing it immediately", type: "kinesthetic" },
+                    { text: "Read the manual first", type: "reading" }
+                ]
+            },
+            {
+                q: "My favorite type of book is:",
+                options: [
+                    { text: "One with lots of pictures", type: "visual" },
+                    { text: "An audiobook or podcast", type: "auditory" },
+                    { text: "An interactive or activity book", type: "kinesthetic" },
+                    { text: "A detailed textbook or novel", type: "reading" }
+                ]
+            },
+            {
+                q: "I remember appointments by:",
+                options: [
+                    { text: "Writing them on a calendar", type: "visual" },
+                    { text: "Setting voice reminders", type: "auditory" },
+                    { text: "Associating them with actions", type: "kinesthetic" },
+                    { text: "Keeping a detailed planner", type: "reading" }
+                ]
+            },
+            {
+                q: "When explaining something to others, I:",
+                options: [
+                    { text: "Draw diagrams or use gestures", type: "visual" },
+                    { text: "Talk them through it", type: "auditory" },
+                    { text: "Have them try it with me", type: "kinesthetic" },
+                    { text: "Write out the steps", type: "reading" }
+                ]
+            }
+        ];
+
+        let currentQuestion = 0;
+        let scores = { visual: 0, auditory: 0, kinesthetic: 0, reading: 0 };
+
+        function loadQuestion() {
+            const q = questions[currentQuestion];
+            const container = document.getElementById('quizContent');
+            
+            document.getElementById('progressFill').style.width = ((currentQuestion / questions.length) * 100) + '%';
+            document.getElementById('progressText').textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+            
+            let html = `<div class="question-card">
+                <h3>${q.q}</h3>
+                <div class="options-grid">`;
+            
+            q.options.forEach((opt, idx) => {
+                html += `<button class="option-btn" onclick="selectAnswer('${opt.type}')">${opt.text}</button>`;
+            });
+            
+            html += `</div></div>`;
+            container.innerHTML = html;
+        }
+
+        function selectAnswer(type) {
+            scores[type]++;
+            currentQuestion++;
+            
+            if (currentQuestion < questions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quizContent').style.display = 'none';
+            document.getElementById('progressText').style.display = 'none';
+            document.querySelector('.progress-bar').style.display = 'none';
+            
+            let maxScore = 0;
+            let dominantStyle = 'visual';
+            
+            for (const [style, score] of Object.entries(scores)) {
+                if (score > maxScore) {
+                    maxScore = score;
+                    dominantStyle = style;
+                }
+            }
+            
+            const resultData = {
+                visual: { icon: '👁️', title: 'Visual Learner', desc: 'You learn best through images, diagrams, charts, and spatial understanding. You benefit from color-coding, mind maps, and visual organizers.' },
+                auditory: { icon: '👂', title: 'Auditory Learner', desc: 'You retain information through listening, discussions, and verbal explanations. You benefit from lectures, podcasts, and study groups.' },
+                kinesthetic: { icon: '✋', title: 'Kinesthetic Learner', desc: 'You learn by doing, moving, and hands-on experimentation. You benefit from practice problems, role-playing, and physical activities.' },
+                reading: { icon: '📖', title: 'Reading/Writing Learner', desc: 'You prefer written words, reading, and taking detailed notes. You benefit from textbooks, lists, and written summaries.' }
+            };
+            
+            const result = resultData[dominantStyle];
+            document.getElementById('resultIcon').textContent = result.icon;
+            document.getElementById('resultTitle').textContent = result.title;
+            document.getElementById('resultDesc').textContent = result.desc;
+            document.getElementById('quizResults').style.display = 'block';
+            
+            // Store result
+            localStorage.setItem('learningStyle', dominantStyle);
+            localStorage.setItem('quizCompleted', 'true');
+        }
+
+        function finishQuiz() {
+            const name = document.getElementById('userNameInput').value.trim() || 'Student';
+            localStorage.setItem('userName', name);
+            window.location.href = 'index.html';
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>
