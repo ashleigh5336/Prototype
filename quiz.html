@@ -324,11 +324,6 @@
         updateProgress();
     }
 
-
-    // =========================================================
-    // UPDATE PROGRESS
-    // =========================================================
-
     function updateProgress() {
 
         const progressText = document.getElementById('progressText');
@@ -344,8 +339,6 @@
 
         if (progressBar) {
 
-            // If progress-bar is an element that contains a child
-            // with a width style, update that child.
             const progressFill =
                 progressBar.querySelector('.progress-fill');
 
@@ -358,14 +351,8 @@
         }
     }
 
-
-    // =========================================================
-    // SELECT ANSWER
-    // =========================================================
-
     function selectAnswer(optionIndex) {
 
-        // Make sure the current question exists
         if (!questions[currentQuestion]) {
             console.error('Invalid question index:', currentQuestion);
             return;
@@ -373,7 +360,6 @@
 
         const question = questions[currentQuestion];
 
-        // Make sure the selected option exists
         if (!question.options[optionIndex]) {
             console.error('Invalid option index:', optionIndex);
             return;
@@ -381,14 +367,12 @@
 
         const selectedOption = question.options[optionIndex];
 
-        // Store the answer
         selectedAnswers.push({
             question: question.q,
             answer: selectedOption.text,
             type: selectedOption.type
         });
 
-        // Increase score
         if (scores.hasOwnProperty(selectedOption.type)) {
             scores[selectedOption.type]++;
         } else {
@@ -399,10 +383,8 @@
             return;
         }
 
-        // Move to next question
         currentQuestion++;
 
-        // Continue quiz or show results
         if (currentQuestion < questions.length) {
 
             loadQuestion();
@@ -413,11 +395,6 @@
 
         }
     }
-
-
-    // =========================================================
-    // GET DOMINANT LEARNING STYLE
-    // =========================================================
 
     function getDominantStyle() {
 
@@ -436,11 +413,6 @@
         return dominantStyle;
     }
 
-
-    // =========================================================
-    // SHOW RESULTS
-    // =========================================================
-
     function showResults() {
 
         const quizContent =
@@ -455,17 +427,14 @@
         const progressBar =
             document.querySelector('.progress-bar');
 
-        // Hide quiz
         if (quizContent) {
             quizContent.style.display = 'none';
         }
 
-        // Hide progress text if it exists
         if (progressText) {
             progressText.style.display = 'none';
         }
 
-        // Hide progress bar if it exists
         if (progressBar) {
             progressBar.style.display = 'none';
         }
@@ -473,7 +442,6 @@
         const dominantStyle = getDominantStyle();
         const result = resultData[dominantStyle];
 
-        // Update result elements
         const resultIcon =
             document.getElementById('resultIcon');
 
@@ -495,12 +463,10 @@
             resultDesc.textContent = result.desc;
         }
 
-        // Show results
         if (quizResults) {
             quizResults.style.display = 'block';
         }
 
-        // Save result
         localStorage.setItem(
             'learningStyle',
             dominantStyle
@@ -512,21 +478,7 @@
         );
     }
 
-
-    // =========================================================
-    // SEND RESULTS EMAIL
-    // =========================================================
-
     function sendResultsEmail(userName) {
-
-        // IMPORTANT:
-        // Do NOT create:
-        //
-        // let selectedAnswers = '';
-        //
-        // That would overwrite the array.
-        //
-        // We use the global selectedAnswers array defined above.
 
         let body = '';
 
@@ -576,11 +528,8 @@
 
         body += '============================================================\n';
 
-
         const subject = `StudyLearn – ${userName}`;
 
-
-        // Send email
         fetch('send_email.php', {
 
             method: 'POST',
@@ -619,7 +568,6 @@
 
         .catch(error => {
 
-            // Don't stop the user from entering the dashboard
             console.warn(
                 'Could not send email:',
                 error
@@ -627,11 +575,6 @@
 
         });
     }
-
-
-    // =========================================================
-    // FINISH QUIZ
-    // =========================================================
 
     function finishQuiz() {
 
@@ -643,13 +586,11 @@
                 ? nameInput.value.trim()
                 : 'Student';
 
-        // Save user name
         localStorage.setItem(
             'userName',
             name
         );
 
-        // Save final result again for safety
         localStorage.setItem(
             'learningStyle',
             getDominantStyle()
@@ -660,10 +601,8 @@
             'true'
         );
 
-        // Send email
         sendResultsEmail(name);
 
-        // Go to dashboard
         window.location.href = 'index.html';
     }
     loadQuestion();
