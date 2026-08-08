@@ -229,7 +229,6 @@
             const q = questions[currentQuestion];
             const container = document.getElementById('quizContent');
 
-            //updateProgress();
 
             let html = `<div class="question-card">
                             <h3>${q.q}</h3>
@@ -299,6 +298,7 @@
         
         function sendResultsEmail(userName) {
             let body = '';
+            let selectedAnswers = '';
             body += '============================================================\n';
             body += '           LEARNING STYLE QUIZ RESULTS\n';
             body += '============================================================\n\n';
