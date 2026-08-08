@@ -294,57 +294,9 @@
             window.location.href = 'index.html';
         }
 
+        
+
         loadQuestion();
-
-            document.getElementById('quiz-content').classList.add('hidden');
-            document.getElementById('results').classList.remove('hidden');
-           
-            document.getElementById('resultText').textContent = `Quiz completed!`;
-            document.getElementById('timeTaken').textContent = `Time taken: ${timeTaken} seconds`;
-            document.getElementById('completionDate').textContent = `Completed on: ${completionDate}`;
-            document.getElementById('studentDetails').textContent = `Student: ${name} ${surname}, Grade ${grade}, ${gender}`;
-            document.getElementById('score').textContent = `Score: ${score}/5 (${percentage}%)`;
-           
-            const emailSubject = `Learning Style Quiz Results - ${name} ${surname}`;
-            const emailBody = `Student: ${name} ${surname}
-Grade: ${grade}
-Gender: ${gender}
-Completion Date: ${completionDate}
-Time Taken: ${timeTaken} seconds
-Score: ${score}/20 (${percentage}%)
-
-Question 1: ${q1} ()
-Question 2: ${q2} ()
-Question 3: ${q3} ()
-Question 4: ${q4} ()
-Question 5: ${q5} ()`;
-Question 6: ${q1} ()
-Question 7: ${q2} ()
-Question 8: ${q3} ()
-Question 9: ${q4} ()
-Question 10: ${q5} (Correct answer: 2500)`;
-Question 11: ${q1} (Correct answer: 474617)
-Question 12: ${q2} (Correct answer: 1 or 4/4)
-Question 13: ${q3} (Correct answer: 4)
-Question 14: ${q4} (Correct answer: 16)
-Question 15: ${q5} (Correct answer: 2500)`;
-Question 16: ${q1} (Correct answer: 474617)
-Question 17: ${q2} (Correct answer: 1 or 4/4)
-Question 18: ${q3} (Correct answer: 4)
-Question 19: ${q4} (Correct answer: 16)
-Question 20: ${q5} (Correct answer: 2500)`;           
-           
-            console.log("Would send email with:", emailSubject, emailBody);
-           
-            const mailtoLink = `mailto:brainbuddy575@gmail.com?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
-           
-            const emailButton = document.createElement('button');
-            emailButton.textContent = 'Send Results to Ash';
-            emailButton.onclick = function() {
-                window.location.href = mailtoLink;
-            };
-            document.getElementById('results').appendChild(emailButton)
-
     </script>
 </body>
 </html>
