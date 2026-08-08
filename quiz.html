@@ -286,8 +286,8 @@
                 auditory: { icon: '👂', title: 'Auditory Learner', desc: 'You retain information through listening, discussions, and verbal explanations. You benefit from lectures, podcasts, and study groups.' },
                 kinesthetic: { icon: '✋', title: 'Kinesthetic Learner', desc: 'You learn by doing, moving, and hands-on experimentation. You benefit from practice problems, role-playing, and physical activities.' },
                 reading: { icon: '📖', title: 'Reading/Writing Learner', desc: 'You prefer written words, reading, and taking detailed notes. You benefit from textbooks, lists, and written summaries.' }
-
-const result = resultData[dominantStyle];
+            }
+            const result = resultData[dominantStyle];
             document.getElementById('resultIcon').textContent = result.icon;
             document.getElementById('resultTitle').textContent = result.title;
             document.getElementById('resultDesc').textContent = result.desc;
