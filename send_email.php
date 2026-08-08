@@ -12,8 +12,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ? trim($_POST['body'])
         : '';
 
-    $headers = "From: noreply@brainbuddy.co.za\r\n";
-    $headers .= "Reply-To: noreply@brainbuddy.co.za\r\n";
+    $headers = "From: brainbuddy575@gmail.com\r\n";
+    $headers .= "Reply-To: brainbuddy575@gmail.com\r\n";
     $headers .= "MIME-Version: 1.0\r\n";
     $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
     $headers .= "X-Mailer: PHP/" . phpversion();

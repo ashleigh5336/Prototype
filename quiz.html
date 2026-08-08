@@ -601,9 +601,8 @@
             'true'
         );
 
-        sendResultsEmail(name);
-
-        window.location.href = 'index.html';
+       await sendResultsEmail(name);
+window.location.href = 'index.html';
     }
     loadQuestion();
 
